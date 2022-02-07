@@ -1,0 +1,20 @@
+{
+  "pipelines": [
+    {
+      "name": "customer",
+      "desc": "filtered customer table",
+      "tables": ["customer"],
+      "stages": [
+        {
+          "name": "filter",
+          "params": {
+            "locator": "from",
+            "operator": "==",
+            "value": "portugal"
+          }
+        }
+      ]
+    }
+  ],
+  "main": "customer"
+}

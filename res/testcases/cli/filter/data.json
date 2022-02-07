@@ -1,0 +1,29 @@
+{
+   "customer": [
+      {
+        "id": 10000,
+        "name": "hikari",
+        "hobbies": [
+          "basketball",
+          "football"
+        ]
+      },
+      {
+        "id": 10001,
+        "name": "kobe",
+        "hobbies": [
+          "basketball",
+          "rap"
+        ],
+        "from": "usa"
+      },
+      {
+        "id": 10002,
+        "name": "ronaldo",
+        "hobbies": [
+          "football"
+        ],
+        "from": "portugal"
+      }
+   ]
+}
