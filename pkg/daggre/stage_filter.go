@@ -3,7 +3,6 @@ package daggre
 import (
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
-	"reflect"
 )
 
 type FilterStage struct {
@@ -15,20 +14,21 @@ type FilterStage struct {
 func (f *FilterStage) Process(tb *Table, r *PipelineRule) *Table {
 	log.Printf("filter stage: %+v\n", f)
 
-	// debugging usage
-	if f.Operator != "==" {
-		return tb
+	locator := NewLocatorFromString(f.Locator)
+	if !locator.Valid() {
+		return &Table{} // empty table
 	}
-	//if reflect.TypeOf(f.Value) != reflect.TypeOf("") {
-	//	return tb
-	//}
 
 	nextTb := Table{}
 	for _, row := range *tb {
-		if reflect.DeepEqual(row[f.Locator], f.Value) {
-			rowCopy := row.Copy()
-			if rowCopy != nil {
-				nextTb = append(nextTb, *rowCopy)
+		locatedValue := locator.Locate(row)
+
+		// comparison?
+		comparison, ok := ComparisonCallbacks[f.Operator]
+		if ok {
+			if comparison(locatedValue, f.Value) {
+				nextTb.AppendRow(row)
+				continue
 			}
 		}
 	}

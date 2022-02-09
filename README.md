@@ -14,5 +14,5 @@ data = [
 which can be used in these scenarios:
 
 - filter and join between table/config data rows
-- map-reduce for medium/low scale data
+- map-reduce for medium/low scale of data
 

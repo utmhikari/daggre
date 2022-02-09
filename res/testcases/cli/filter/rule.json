@@ -9,7 +9,7 @@
           "name": "filter",
           "params": {
             "locator": "from",
-            "operator": "==",
+            "operator": ">=",
             "value": "portugal"
           }
         }

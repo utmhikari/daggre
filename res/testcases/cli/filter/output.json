@@ -1,0 +1,19 @@
+[
+  {
+    "from": "usa",
+    "hobbies": [
+      "basketball",
+      "rap"
+    ],
+    "id": 10001,
+    "name": "kobe"
+  },
+  {
+    "from": "portugal",
+    "hobbies": [
+      "football"
+    ],
+    "id": 10002,
+    "name": "ronaldo"
+  }
+]

@@ -17,7 +17,16 @@ func (r *Row) Copy() *Row {
 	return cp
 }
 
-type Table []Row
+type Table []*Row
+
+func (t *Table) AppendRow(r *Row) {
+	if r != nil {
+		rowCopy := r.Copy()
+		if rowCopy != nil {
+			*t = append(*t, rowCopy)
+		}
+	}
+}
 
 type Data map[string]*Table
 
@@ -30,10 +39,7 @@ func (d *Data) GetTable(name string) *Table {
 
 	tbCopy := Table{}
 	for _, row := range *tb {
-		rowCopy := row.Copy()
-		if rowCopy != nil {
-			tbCopy = append(tbCopy, *rowCopy)
-		}
+		tbCopy.AppendRow(row)
 	}
 	return &tbCopy
 }
@@ -45,10 +51,7 @@ func (d *Data) GetMergedTables(names ...string) *Table {
 		tb := d.GetTable(name)
 		if tb != nil {
 			for _, row := range *tb {
-				rowCopy := row.Copy()
-				if rowCopy != nil {
-					tbAll = append(tbAll, *rowCopy)
-				}
+				tbAll.AppendRow(row)
 			}
 		}
 	}

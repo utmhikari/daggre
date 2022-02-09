@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"encoding/json"
 	"github.com/utmhikari/daggre/internal/cmd"
 	"github.com/utmhikari/daggre/pkg/daggre"
 	"github.com/utmhikari/daggre/pkg/util"
+	"io/ioutil"
 	"log"
 	"path"
 )
@@ -32,7 +34,18 @@ func Start() {
 
 	tb, err := rule.Apply(data)
 	if err != nil {
-		log.Panicf("failed to run daggre, %s\n", err.Error())
+		log.Panicf("failed to apply pipeline rule, %s\n", err.Error())
 	}
-	log.Printf("output: %+v\n", tb)
+
+	jsonData, err := json.MarshalIndent(tb, "", "  ")
+	if err != nil {
+		log.Panicf("failed to marshal result as json, %s\n", err.Error())
+	}
+
+	outputPath := path.Join(cmd.CliParams.Dir, cmd.CliParams.OutputFile)
+	err = ioutil.WriteFile(outputPath, jsonData, 0644)
+	if err != nil {
+		log.Panicf("failed to dump result to output file, %s\n", err.Error())
+	}
+	log.Printf("dump result successfully")
 }
