@@ -11,7 +11,7 @@ type FilterStage struct {
 	Value    interface{} `json:"value"`
 }
 
-func (f *FilterStage) Process(tb *Table, r *PipelineRule) *Table {
+func (f *FilterStage) Process(tb *Table, r *Aggregator) *Table {
 	log.Printf("filter stage: %+v\n", f)
 
 	locator := NewLocatorFromString(f.Locator)
@@ -23,14 +23,12 @@ func (f *FilterStage) Process(tb *Table, r *PipelineRule) *Table {
 	for _, row := range *tb {
 		locatedValue := locator.Locate(row)
 
-		// comparison?
-		comparison, ok := ComparisonCallbacks[f.Operator]
-		if ok {
-			if comparison(locatedValue, f.Value) {
-				nextTb.AppendRow(row)
-				continue
-			}
+		// compare?
+		if Compare(locatedValue, f.Value, f.Operator) {
+			nextTb.AppendRow(row)
+			continue
 		}
+
 	}
 	return &nextTb
 }

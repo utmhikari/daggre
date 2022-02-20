@@ -43,7 +43,7 @@ func main() {
 		// =================== cli start ===================
 		cli.StringFlag{
 			Name:        "dir,d",
-			Usage:       "CLI: root directory which contains data & aggregation rules",
+			Usage:       "CLI: root directory which contains data & aggregator",
 			Required:    true,
 			Destination: &cmd.CliParams.Dir,
 		},
@@ -55,11 +55,11 @@ func main() {
 			Destination: &cmd.CliParams.DataFile,
 		},
 		cli.StringFlag{
-			Name:        "rulefile",
-			Usage:       "CLI: aggregation rule file name",
+			Name:        "aggrefile",
+			Usage:       "CLI: aggregator file name",
 			Required:    false,
-			Value:       "rule.json",
-			Destination: &cmd.CliParams.RuleFile,
+			Value:       "aggre.json",
+			Destination: &cmd.CliParams.AggreFile,
 		},
 		cli.StringFlag{
 			Name:        "outputfile",

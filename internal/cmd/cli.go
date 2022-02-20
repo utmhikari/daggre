@@ -3,7 +3,7 @@ package cmd
 type cliParams struct {
 	Dir        string
 	DataFile   string
-	RuleFile   string
+	AggreFile  string
 	OutputFile string
 }
 

@@ -17,15 +17,15 @@ var (
 	FloatType  = reflect.TypeOf(0.0)
 )
 
-func ComparisonEq(a, b interface{}) bool {
+func compareEq(a, b interface{}) bool {
 	return reflect.DeepEqual(a, b)
 }
 
-func ComparisonNe(a, b interface{}) bool {
+func compareNe(a, b interface{}) bool {
 	return !reflect.DeepEqual(a, b)
 }
 
-func ComparisonCommon(a, b interface{}, operator string) bool {
+func compareCommon(a, b interface{}, operator string) bool {
 	if a == nil || b == nil {
 		return false
 	}
@@ -87,11 +87,20 @@ func ComparisonCommon(a, b interface{}, operator string) bool {
 	return false
 }
 
-var ComparisonCallbacks = map[string]func(a, b interface{}) bool{
-	ComparisonOperatorEq: ComparisonEq,
-	ComparisonOperatorNe: ComparisonNe,
-	ComparisonOperatorGt: func(a, b interface{}) bool { return ComparisonCommon(a, b, ComparisonOperatorGt) },
-	ComparisonOperatorGe: func(a, b interface{}) bool { return ComparisonCommon(a, b, ComparisonOperatorGe) },
-	ComparisonOperatorLt: func(a, b interface{}) bool { return ComparisonCommon(a, b, ComparisonOperatorLt) },
-	ComparisonOperatorLe: func(a, b interface{}) bool { return ComparisonCommon(a, b, ComparisonOperatorLe) },
+var comparators = map[string]func(a, b interface{}) bool{
+	ComparisonOperatorEq: compareEq,
+	ComparisonOperatorNe: compareNe,
+	ComparisonOperatorGt: func(a, b interface{}) bool { return compareCommon(a, b, ComparisonOperatorGt) },
+	ComparisonOperatorGe: func(a, b interface{}) bool { return compareCommon(a, b, ComparisonOperatorGe) },
+	ComparisonOperatorLt: func(a, b interface{}) bool { return compareCommon(a, b, ComparisonOperatorLt) },
+	ComparisonOperatorLe: func(a, b interface{}) bool { return compareCommon(a, b, ComparisonOperatorLe) },
+}
+
+func Compare(a, b interface{}, operator string) bool {
+	// comparison?
+	comparator, ok := comparators[operator]
+	if !ok {
+		return false
+	}
+	return comparator(a, b)
 }

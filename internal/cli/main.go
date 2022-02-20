@@ -22,19 +22,19 @@ func Start() {
 	}
 
 	// load pipeline
-	rule := &daggre.PipelineRule{}
-	rulePath := path.Join(cmd.CliParams.Dir, cmd.CliParams.RuleFile)
-	err = util.ReadJsonFile(rulePath, &rule)
+	aggregator := &daggre.Aggregator{}
+	aggregatorPath := path.Join(cmd.CliParams.Dir, cmd.CliParams.AggreFile)
+	err = util.ReadJsonFile(aggregatorPath, &aggregator)
 	if err != nil {
-		log.Panicf("failed to load rule file, %s\n", err.Error())
+		log.Panicf("failed to load aggregator file, %s\n", err.Error())
 	}
 
 	log.Printf("data: %+v\n", data)
-	log.Printf("rule: %+v\n", rule)
+	log.Printf("aggregator: %+v\n", aggregator)
 
-	tb, err := rule.Apply(data)
+	tb, err := aggregator.Aggregate(data)
 	if err != nil {
-		log.Panicf("failed to apply pipeline rule, %s\n", err.Error())
+		log.Panicf("failed to process aggregator, %s\n", err.Error())
 	}
 
 	jsonData, err := json.MarshalIndent(tb, "", "  ")
