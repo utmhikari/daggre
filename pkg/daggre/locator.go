@@ -11,7 +11,7 @@ type Locator struct {
 
 var locatorSep = "."
 
-func NewLocatorFromString(s string) *Locator {
+func NewLocator(s string) *Locator {
 	splits := strings.Split(s, locatorSep)
 	locator := &Locator{
 		fields: []string{},

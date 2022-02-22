@@ -14,7 +14,7 @@ type FilterStage struct {
 func (f *FilterStage) Process(tb *Table, r *Aggregator) *Table {
 	log.Printf("filter stage: %+v\n", f)
 
-	locator := NewLocatorFromString(f.Locator)
+	locator := NewLocator(f.Locator)
 	if !locator.Valid() {
 		return &Table{} // empty table
 	}

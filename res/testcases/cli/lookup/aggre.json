@@ -1,0 +1,30 @@
+{
+  "pipelines": [
+    {
+      "name": "country",
+      "desc": "join customers of country",
+      "tables": [
+        "country"
+      ],
+      "stages": [
+        {
+          "name": "lookup",
+          "params": {
+            "fromPipeline": "customer",
+            "localLocator": "name",
+            "foreignLocator": "from",
+            "toField": "customers"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer",
+      "desc": "customer original table",
+      "tables": [
+        "customer"
+      ]
+    }
+  ],
+  "main": "country"
+}

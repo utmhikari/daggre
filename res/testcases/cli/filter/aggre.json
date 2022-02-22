@@ -3,7 +3,9 @@
     {
       "name": "customer",
       "desc": "filtered customer table",
-      "tables": ["customer"],
+      "tables": [
+        "customer"
+      ],
       "stages": [
         {
           "name": "filter",

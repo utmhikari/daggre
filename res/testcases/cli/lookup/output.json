@@ -1,0 +1,44 @@
+[
+  {
+    "customers": [
+      {
+        "from": "china",
+        "hobbies": [
+          "basketball",
+          "football"
+        ],
+        "id": 10000,
+        "name": "hikari"
+      }
+    ],
+    "id": 1,
+    "name": "china"
+  },
+  {
+    "customers": [
+      {
+        "from": "usa",
+        "hobbies": [
+          "basketball",
+          "rap"
+        ],
+        "id": 10001,
+        "name": "kobe"
+      },
+      {
+        "from": "usa",
+        "hobbies": [
+          "basketball"
+        ],
+        "id": 10003,
+        "name": "james"
+      }
+    ],
+    "id": 2,
+    "name": "usa"
+  },
+  {
+    "id": 3,
+    "name": "russia"
+  }
+]

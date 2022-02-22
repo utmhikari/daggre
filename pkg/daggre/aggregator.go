@@ -60,6 +60,7 @@ type PipelineStageInterface interface {
 
 var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInterface{
 	"filter": NewFilterStage,
+	"lookup": NewLookupStage,
 }
 
 func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
@@ -72,6 +73,10 @@ func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
 		}
 		stageInterface := stageInterfaceFactory(stage.Params)
 		tb = stageInterface.Process(tb, a)
+		if len(*tb) == 0 {
+			log.Printf("empty data after stage %+v\n", stage)
+			break
+		}
 	}
 
 	return tb, nil
