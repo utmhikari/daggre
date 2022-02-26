@@ -69,6 +69,7 @@ func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
 	for _, stage := range p.Stages {
 		stageInterfaceFactory, ok := PipelineStageFactory[stage.Name]
 		if !ok {
+			// TODO: graceful implementations
 			log.Fatalf("unsupported stage %s\n", stage.Name)
 		}
 		stageInterface := stageInterfaceFactory(stage.Params)

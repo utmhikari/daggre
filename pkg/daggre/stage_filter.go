@@ -1,7 +1,7 @@
 package daggre
 
 import (
-	"github.com/utmhikari/daggre/pkg/util"
+	"encoding/json"
 	"log"
 )
 
@@ -11,7 +11,7 @@ type FilterStage struct {
 	Value    interface{} `json:"value"`
 }
 
-func (f *FilterStage) Process(tb *Table, r *Aggregator) *Table {
+func (f *FilterStage) Process(tb *Table, a *Aggregator) *Table {
 	log.Printf("filter stage: %+v\n", f)
 
 	locator := NewLocator(f.Locator)
@@ -35,8 +35,7 @@ func (f *FilterStage) Process(tb *Table, r *Aggregator) *Table {
 
 func NewFilterStage(params PipelineStageParams) PipelineStageInterface {
 	filterStage := FilterStage{}
-	filterStage.Locator = util.ToString(params["locator"])
-	filterStage.Operator = util.ToString(params["operator"])
-	filterStage.Value = params["value"]
+	jsonString, _ := json.Marshal(params)
+	_ = json.Unmarshal(jsonString, &filterStage)
 	return &filterStage
 }

@@ -12,7 +12,7 @@ type LookupStage struct {
 	ToField        string `json:"toField"`
 }
 
-func (j *LookupStage) Process(tb *Table, r *Aggregator) *Table {
+func (j *LookupStage) Process(tb *Table, a *Aggregator) *Table {
 	log.Printf("join stage: %+v\n", j)
 
 	// TODO: validation
@@ -20,7 +20,7 @@ func (j *LookupStage) Process(tb *Table, r *Aggregator) *Table {
 		return &Table{}
 	}
 
-	fromTb, err := r.GetPipelineData(j.FromPipeline)
+	fromTb, err := a.GetPipelineData(j.FromPipeline)
 	if err != nil {
 		log.Printf("err at pipeline %s -> %s\n", j.FromPipeline, err.Error())
 		return &Table{}
