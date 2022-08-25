@@ -10,9 +10,9 @@
         {
           "name": "filter",
           "params": {
-            "locator": "from",
+            "locator": "id",
             "operator": ">=",
-            "value": "portugal"
+            "value": 1e3
           }
         }
       ]

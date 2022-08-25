@@ -7,7 +7,7 @@
         "basketball",
         "football"
       ],
-      "from": "china"
+      "from": 101
     },
     {
       "id": 10001,
@@ -16,7 +16,7 @@
         "basketball",
         "rap"
       ],
-      "from": "usa"
+      "from": 202.0
     },
     {
       "id": 10002,
@@ -24,7 +24,7 @@
       "hobbies": [
         "football"
       ],
-      "from": "portugal"
+      "from": 404
     },
     {
       "id": 10003,
@@ -32,20 +32,20 @@
       "hobbies": [
         "basketball"
       ],
-      "from": "usa"
+      "from": 303
     }
   ],
   "country": [
     {
-      "id": 1,
+      "id": 101,
       "name": "china"
     },
     {
-      "id": 2,
+      "id": 202,
       "name": "usa"
     },
     {
-      "id": 3,
+      "id": 303.0,
       "name": "russia"
     }
   ]

@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+// ============================== Aggregator start ==============================
+
 type Aggregator struct {
 	Pipelines []*Pipeline `json:"pipelines"`
 	Main      string      `json:"main"`
@@ -53,6 +55,8 @@ func (a *Aggregator) Aggregate(data *Data) (*Table, error) {
 	a.data = data
 	return a.GetPipelineData(a.Main)
 }
+
+// ============================== Aggregator end ==============================
 
 type PipelineStageInterface interface {
 	Process(*Table, *Aggregator) *Table
