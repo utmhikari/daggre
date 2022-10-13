@@ -1,11 +1,19 @@
 [
   {
+    "hobbies": [
+      "basketball",
+      "football"
+    ],
+    "id": -1,
+    "name": "hikari"
+  },
+  {
     "from": "usa",
     "hobbies": [
       "basketball",
       "rap"
     ],
-    "id": 100000,
+    "id": -2.5,
     "name": "kobe"
   }
 ]

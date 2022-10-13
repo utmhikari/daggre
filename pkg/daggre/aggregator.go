@@ -9,8 +9,8 @@ import (
 // ============================== Aggregator start ==============================
 
 type Aggregator struct {
-	Pipelines []*Pipeline `json:"pipelines"`
-	Main      string      `json:"main"`
+	Pipelines []*Pipeline `json:"pipelines" binding:"required"`
+	Main      string      `json:"main" binding:"required"`
 
 	// data source dataset
 	data *Data
@@ -74,7 +74,7 @@ func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
 		stageInterfaceFactory, ok := PipelineStageFactory[stage.Name]
 		if !ok {
 			// TODO: graceful implementations
-			log.Fatalf("unsupported stage %s\n", stage.Name)
+			log.Panicf("unsupported stage %s\n", stage.Name)
 		}
 		stageInterface := stageInterfaceFactory(stage.Params)
 		tb = stageInterface.Process(tb, a)

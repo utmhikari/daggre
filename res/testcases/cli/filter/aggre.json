@@ -11,8 +11,8 @@
           "name": "filter",
           "params": {
             "locator": "id",
-            "operator": ">=",
-            "value": 1e3
+            "operator": "<=",
+            "value": -1
           }
         }
       ]
