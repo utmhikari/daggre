@@ -1,10 +1,8 @@
-package cmd
+package cli
 
-type cliParams struct {
+type Args struct {
 	Dir        string
 	DataFile   string
 	AggreFile  string
 	OutputFile string
 }
-
-var CliParams = cliParams{}

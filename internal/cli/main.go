@@ -2,7 +2,6 @@ package cli
 
 import (
 	"encoding/json"
-	"github.com/utmhikari/daggre/internal/cmd"
 	"github.com/utmhikari/daggre/pkg/daggre"
 	"github.com/utmhikari/daggre/pkg/util"
 	"io/ioutil"
@@ -10,12 +9,12 @@ import (
 	"path"
 )
 
-func Start() {
-	log.Printf("cli params: %+v\n", cmd.CliParams)
+func Start(args *Args) {
+	log.Printf("cli cmd args: %+v\n", args)
 
 	// load data
 	data := &daggre.Data{}
-	dataPath := path.Join(cmd.CliParams.Dir, cmd.CliParams.DataFile)
+	dataPath := path.Join(args.Dir, args.DataFile)
 	err := util.ReadJsonFile(dataPath, &data)
 	if err != nil {
 		log.Panicf("failed to load data file, %s\n", err.Error())
@@ -23,7 +22,7 @@ func Start() {
 
 	// load pipeline
 	aggregator := &daggre.Aggregator{}
-	aggregatorPath := path.Join(cmd.CliParams.Dir, cmd.CliParams.AggreFile)
+	aggregatorPath := path.Join(args.Dir, args.AggreFile)
 	err = util.ReadJsonFile(aggregatorPath, &aggregator)
 	if err != nil {
 		log.Panicf("failed to load aggregator file, %s\n", err.Error())
@@ -42,7 +41,7 @@ func Start() {
 		log.Panicf("failed to marshal result as json, %s\n", err.Error())
 	}
 
-	outputPath := path.Join(cmd.CliParams.Dir, cmd.CliParams.OutputFile)
+	outputPath := path.Join(args.Dir, args.OutputFile)
 	err = ioutil.WriteFile(outputPath, jsonData, 0644)
 	if err != nil {
 		log.Panicf("failed to dump result to output file, %s\n", err.Error())

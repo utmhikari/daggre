@@ -3,13 +3,12 @@ package svr
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/utmhikari/daggre/internal/cmd"
 	"github.com/utmhikari/daggre/internal/svr/handler"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
 
-type ServerConfig struct {
+type Cfg struct {
 	Port int `json:"port"`
 }
 
@@ -29,18 +28,19 @@ func router() *gin.Engine {
 	return r
 }
 
-func Start() {
-	log.Printf("svr params: %+v\n", cmd.SvrParams)
+func Start(args *Args) {
+	log.Printf("svr cmd args: %+v\n", args)
 
-	cfgPath := cmd.SvrParams.CfgPath
-	svrCfg := &ServerConfig{}
-	err := util.ReadJsonFile(cfgPath, svrCfg)
+	cfgPath := args.CfgPath
+	cfg := &Cfg{}
+	err := util.ReadYamlFile(cfgPath, cfg)
 	if err != nil {
 		log.Panicf("failed to load server config from %s, %v\n", cfgPath, err)
 	}
+	log.Printf("svr cfg: %+v\n", cfg)
 
 	r := router()
-	addr := fmt.Sprintf(":%d", svrCfg.Port)
+	addr := fmt.Sprintf(":%d", cfg.Port)
 	err = r.Run(addr)
 	if err != nil {
 		log.Panicf("server error: %v", err)

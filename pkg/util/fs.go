@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 )
@@ -63,4 +64,12 @@ func ReadJsonFile(p string, v interface{}) error {
 		return err
 	}
 	return json.Unmarshal(bytes, v)
+}
+
+func ReadYamlFile(p string, v interface{}) error {
+	bytes, err := ioutil.ReadFile(p)
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal(bytes, v)
 }
