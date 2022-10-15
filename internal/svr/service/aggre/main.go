@@ -6,7 +6,7 @@ import (
 )
 
 func DoAggregate(params *model.AggreParams) (*daggre.Table, error) {
-	data := &(params.Data)
-	aggre := &(params.Aggre)
+	data := params.Data
+	aggre := params.Aggre
 	return aggre.Aggregate(data)
 }

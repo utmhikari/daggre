@@ -16,7 +16,7 @@ func (a *aggreHandler) Aggregate(c *gin.Context) {
 	if err := c.ShouldBindJSON(&aggreParams); err != nil {
 		log.Printf("AggreParams error: %v\n", err)
 		ErrResp(c).
-			Message(fmt.Sprintf("params error: %v\n", err)).
+			SetMessage(fmt.Sprintf("params error: %v\n", err)).
 			Response()
 		return
 	}
@@ -27,7 +27,7 @@ func (a *aggreHandler) Aggregate(c *gin.Context) {
 	if err != nil {
 		log.Printf("DoAggregate error: %v\n", err)
 		ErrResp(c).
-			Message(fmt.Sprintf("aggregation error: %v\n", err)).
+			SetMessage(fmt.Sprintf("aggregation error: %v\n", err)).
 			Response()
 		return
 	}
@@ -35,7 +35,7 @@ func (a *aggreHandler) Aggregate(c *gin.Context) {
 	endTime := time.Now()
 	deltaTime := endTime.Sub(startTime)
 	log.Printf("aggregation elapsed %d milliseconds\n", deltaTime.Milliseconds())
-	OKResp(c).Message("aggregate successfully!").Data(data).Response()
+	OKResp(c).SetMessage("aggregate successfully!").SetData(data).Response()
 }
 
 var Aggre = &aggreHandler{}

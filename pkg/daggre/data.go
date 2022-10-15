@@ -1,6 +1,8 @@
 package daggre
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
@@ -17,6 +19,10 @@ func (r *Row) Copy() *Row {
 	return cp
 }
 
+func (r *Row) Equals(other *Row) bool {
+	return fmt.Sprint(*r) == fmt.Sprint(*other)
+}
+
 type Table []*Row
 
 func (t *Table) AppendRow(r *Row) {
@@ -26,6 +32,28 @@ func (t *Table) AppendRow(r *Row) {
 			*t = append(*t, rowCopy)
 		}
 	}
+}
+
+func (t *Table) ToString() string {
+	jsonBytes, err := json.MarshalIndent(*t, "", "  ")
+	if err != nil {
+		return "<INVALID TABLE>"
+	}
+	return string(jsonBytes)
+}
+
+func (t *Table) Equals(other *Table) bool {
+	if len(*t) != len(*other) {
+		return false
+	}
+	for i := 0; i < len(*t); i++ {
+		row1, row2 := (*t)[i], (*other)[i]
+		if !row1.Equals(row2) {
+			log.Printf("[%d] -> %+v != %+v\n", i, *row1, *row2)
+			return false
+		}
+	}
+	return true
 }
 
 type Data map[string]*Table
