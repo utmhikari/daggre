@@ -2,17 +2,20 @@
   "pipelines": [
     {
       "name": "customer",
-      "desc": "filtered customer table",
+      "desc": "customers data",
       "tables": [
         "customer"
       ],
       "stages": [
         {
-          "name": "filter",
+          "name": "sort",
           "params": {
-            "locator": "id",
-            "operator": "<=",
-            "value": -1
+            "rules": [
+              {
+                "locator": "name",
+                "order": 1
+              }
+            ]
           }
         }
       ]

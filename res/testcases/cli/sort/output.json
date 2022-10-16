@@ -1,0 +1,36 @@
+[
+  {
+    "from": 101,
+    "hobbies": [
+      "basketball",
+      "football"
+    ],
+    "id": 10000,
+    "name": "hikari"
+  },
+  {
+    "from": 303,
+    "hobbies": [
+      "basketball"
+    ],
+    "id": 10003,
+    "name": "james"
+  },
+  {
+    "from": 202,
+    "hobbies": [
+      "basketball",
+      "rap"
+    ],
+    "id": 10001,
+    "name": "kobe"
+  },
+  {
+    "from": 404,
+    "hobbies": [
+      "football"
+    ],
+    "id": 10002,
+    "name": "ronaldo"
+  }
+]

@@ -6,9 +6,11 @@ import (
 	"log"
 )
 
+// ============================== Aggregator start ==============================
+
 type Aggregator struct {
-	Pipelines []*Pipeline `json:"pipelines"`
-	Main      string      `json:"main"`
+	Pipelines []*Pipeline `json:"pipelines" binding:"required"`
+	Main      string      `json:"main" binding:"required"`
 
 	// data source dataset
 	data *Data
@@ -54,6 +56,8 @@ func (a *Aggregator) Aggregate(data *Data) (*Table, error) {
 	return a.GetPipelineData(a.Main)
 }
 
+// ============================== Aggregator end ==============================
+
 type PipelineStageInterface interface {
 	Process(*Table, *Aggregator) *Table
 }
@@ -61,6 +65,7 @@ type PipelineStageInterface interface {
 var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInterface{
 	"filter": NewFilterStage,
 	"lookup": NewLookupStage,
+	"sort":   NewSortStage,
 }
 
 func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
@@ -70,7 +75,7 @@ func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
 		stageInterfaceFactory, ok := PipelineStageFactory[stage.Name]
 		if !ok {
 			// TODO: graceful implementations
-			log.Fatalf("unsupported stage %s\n", stage.Name)
+			log.Panicf("unsupported stage %s\n", stage.Name)
 		}
 		stageInterface := stageInterfaceFactory(stage.Params)
 		tb = stageInterface.Process(tb, a)

@@ -12,21 +12,21 @@ type LookupStage struct {
 	ToField        string `json:"toField"`
 }
 
-func (j *LookupStage) Process(tb *Table, a *Aggregator) *Table {
-	log.Printf("join stage: %+v\n", j)
+func (l *LookupStage) Process(tb *Table, a *Aggregator) *Table {
+	log.Printf("lookup stage: %s\n", util.JsonDump(l))
 
 	// TODO: validation
-	if len(j.ToField) == 0 {
+	if len(l.ToField) == 0 {
 		return &Table{}
 	}
 
-	fromTb, err := a.GetPipelineData(j.FromPipeline)
+	fromTb, err := a.GetPipelineData(l.FromPipeline)
 	if err != nil {
-		log.Printf("err at pipeline %s -> %s\n", j.FromPipeline, err.Error())
+		log.Printf("err at pipeline %s -> %s\n", l.FromPipeline, err.Error())
 		return &Table{}
 	}
 
-	foreignLocator := NewLocator(j.ForeignLocator)
+	foreignLocator := NewLocator(l.ForeignLocator)
 	fromTbRowMap := make(map[interface{}][]*Row)
 	for _, row := range *fromTb {
 		locatedValue := foreignLocator.Locate(row)
@@ -40,7 +40,7 @@ func (j *LookupStage) Process(tb *Table, a *Aggregator) *Table {
 		}
 	}
 
-	localLocator := NewLocator(j.LocalLocator)
+	localLocator := NewLocator(l.LocalLocator)
 	for _, row := range *tb {
 		locatedValue := localLocator.Locate(row)
 		rows, ok := fromTbRowMap[locatedValue]
@@ -49,7 +49,7 @@ func (j *LookupStage) Process(tb *Table, a *Aggregator) *Table {
 			for _, r := range rows {
 				newRows = append(newRows, r.Copy())
 			}
-			(*row)[j.ToField] = newRows
+			(*row)[l.ToField] = newRows
 		}
 	}
 

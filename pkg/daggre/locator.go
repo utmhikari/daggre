@@ -28,25 +28,25 @@ func (l *Locator) Valid() bool {
 	return len(l.fields) > 0
 }
 
-func (l *Locator) Locate(r *Row) interface{} {
-	if r == nil {
-		return nil
-	}
+var mapType = reflect.TypeOf(make(map[string]interface{}))
 
-	if !l.Valid() {
+func isMapType(v interface{}) bool {
+	tp := reflect.TypeOf(v)
+	return tp == mapType
+}
+
+func (l *Locator) Locate(r *Row) interface{} {
+	if r == nil || !l.Valid() {
 		return nil
 	}
 
 	var ptr interface{} = r
-	mapType := reflect.TypeOf(make(map[string]interface{}))
 	for _, field := range l.fields {
 		if ptr == nil {
 			break
 		}
-		// TODO: implement IsMapType(obj interface{}) method
 		if ptr != r {
-			ptrType := reflect.TypeOf(ptr)
-			if ptrType != reflect.TypeOf(mapType) && ptrType != reflect.TypeOf(r) {
+			if !isMapType(ptr) {
 				ptr = nil
 				break
 			}
@@ -66,4 +66,44 @@ func (l *Locator) Locate(r *Row) interface{} {
 		}
 	}
 	return ptr
+}
+
+func (l *Locator) Set(r *Row, v interface{}) bool {
+	if r == nil || !l.Valid() {
+		return false
+	}
+
+	var ptr interface{} = r
+
+	for i, field := range l.fields {
+		if ptr == nil {
+			return false
+		}
+		if ptr != r {
+			if !isMapType(ptr) {
+				return false
+			}
+		}
+		if i < len(l.fields)-1 {
+			var nxt interface{}
+			var ok bool
+			if ptr == r {
+				nxt, ok = (*r)[field]
+			} else {
+				nxt, ok = ptr.(map[string]interface{})[field]
+			}
+			if !ok {
+				return false
+			} else {
+				ptr = nxt
+			}
+		} else {
+			if ptr == r {
+				(*r)[field] = v
+			} else {
+				ptr.(map[string]interface{})[field] = v
+			}
+		}
+	}
+	return true
 }
