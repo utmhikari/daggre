@@ -2,6 +2,7 @@ package daggre
 
 import (
 	"encoding/json"
+	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
 
@@ -12,7 +13,7 @@ type FilterStage struct {
 }
 
 func (f *FilterStage) Process(tb *Table, a *Aggregator) *Table {
-	log.Printf("filter stage: %+v\n", f)
+	log.Printf("filter stage: %s\n", util.JsonDump(f))
 
 	locator := NewLocator(f.Locator)
 	if !locator.Valid() {

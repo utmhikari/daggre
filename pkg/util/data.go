@@ -15,3 +15,19 @@ func DeepCopyByJson(src interface{}, dest interface{}) error {
 	}
 	return nil
 }
+
+var jsonDumpPrefix = ""
+var jsonDumpIndent = "  "
+
+func JsonDumpSafe(v interface{}) (string, error) {
+	bytes, err := json.MarshalIndent(v, jsonDumpPrefix, jsonDumpIndent)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+func JsonDump(v interface{}) string {
+	s, _ := JsonDumpSafe(v)
+	return s
+}

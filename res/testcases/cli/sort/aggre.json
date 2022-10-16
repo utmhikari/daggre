@@ -1,0 +1,25 @@
+{
+  "pipelines": [
+    {
+      "name": "customer",
+      "desc": "customers data",
+      "tables": [
+        "customer"
+      ],
+      "stages": [
+        {
+          "name": "sort",
+          "params": {
+            "rules": [
+              {
+                "locator": "name",
+                "order": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "main": "customer"
+}

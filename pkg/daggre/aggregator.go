@@ -65,6 +65,7 @@ type PipelineStageInterface interface {
 var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInterface{
 	"filter": NewFilterStage,
 	"lookup": NewLookupStage,
+	"sort":   NewSortStage,
 }
 
 func (p *Pipeline) Process(a *Aggregator) (*Table, error) {

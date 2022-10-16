@@ -24,7 +24,7 @@ func compareNe(a, b interface{}) bool {
 	return !reflect.DeepEqual(a, b)
 }
 
-func compareOrderedImpl[T constraints.Ordered](a, b T, operator string) bool {
+func compareOrderImpl[T constraints.Ordered](a, b T, operator string) bool {
 	switch operator {
 	case ComparisonOperatorGt:
 		return a > b
@@ -39,7 +39,7 @@ func compareOrderedImpl[T constraints.Ordered](a, b T, operator string) bool {
 	}
 }
 
-func compareOrdered(a, b interface{}, operator string) bool {
+func compareOrder(a, b interface{}, operator string) bool {
 	// check nil
 	if a == nil || b == nil {
 		return false
@@ -51,7 +51,7 @@ func compareOrdered(a, b interface{}, operator string) bool {
 
 	// string
 	if aKind == reflect.String && bKind == reflect.String {
-		return compareOrderedImpl[string](a.(string), b.(string), operator)
+		return compareOrderImpl[string](a.(string), b.(string), operator)
 	}
 
 	// number: convert to float64 in all
@@ -65,7 +65,7 @@ func compareOrdered(a, b interface{}, operator string) bool {
 		if bErr != nil {
 			return false
 		}
-		return compareOrderedImpl[float64](aValue, bValue, operator)
+		return compareOrderImpl[float64](aValue, bValue, operator)
 	}
 
 	// unsupported
@@ -76,10 +76,10 @@ func compareOrdered(a, b interface{}, operator string) bool {
 var comparators = map[string]func(a, b interface{}) bool{
 	ComparisonOperatorEq: compareEq,
 	ComparisonOperatorNe: compareNe,
-	ComparisonOperatorGt: func(a, b interface{}) bool { return compareOrdered(a, b, ComparisonOperatorGt) },
-	ComparisonOperatorGe: func(a, b interface{}) bool { return compareOrdered(a, b, ComparisonOperatorGe) },
-	ComparisonOperatorLt: func(a, b interface{}) bool { return compareOrdered(a, b, ComparisonOperatorLt) },
-	ComparisonOperatorLe: func(a, b interface{}) bool { return compareOrdered(a, b, ComparisonOperatorLe) },
+	ComparisonOperatorGt: func(a, b interface{}) bool { return compareOrder(a, b, ComparisonOperatorGt) },
+	ComparisonOperatorGe: func(a, b interface{}) bool { return compareOrder(a, b, ComparisonOperatorGe) },
+	ComparisonOperatorLt: func(a, b interface{}) bool { return compareOrder(a, b, ComparisonOperatorLt) },
+	ComparisonOperatorLe: func(a, b interface{}) bool { return compareOrder(a, b, ComparisonOperatorLe) },
 }
 
 func Compare(a, b interface{}, operator string) bool {
@@ -89,4 +89,16 @@ func Compare(a, b interface{}, operator string) bool {
 		return false
 	}
 	return comparator(a, b)
+}
+
+func CanCompareOrder(a, b interface{}) bool {
+	aType, bType := reflect.TypeOf(a), reflect.TypeOf(b)
+	aKind, bKind := aType.Kind(), bType.Kind()
+	if aKind == reflect.String && bKind == reflect.String {
+		return true
+	}
+	if aKind >= reflect.Int && aKind <= reflect.Float64 && bKind >= reflect.Int && bKind <= reflect.Float64 {
+		return true
+	}
+	return false
 }

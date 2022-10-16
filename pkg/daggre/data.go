@@ -1,7 +1,6 @@
 package daggre
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
@@ -9,6 +8,7 @@ import (
 
 type Row map[string]interface{}
 
+// Copy get copy of current row data
 func (r *Row) Copy() *Row {
 	cp := &Row{}
 	err := util.DeepCopyByJson(r, cp)
@@ -19,12 +19,14 @@ func (r *Row) Copy() *Row {
 	return cp
 }
 
+// Equals returns true if the row is equal to the other
 func (r *Row) Equals(other *Row) bool {
 	return fmt.Sprint(*r) == fmt.Sprint(*other)
 }
 
 type Table []*Row
 
+// AppendRow appends a copied row to current table
 func (t *Table) AppendRow(r *Row) {
 	if r != nil {
 		rowCopy := r.Copy()
@@ -34,14 +36,16 @@ func (t *Table) AppendRow(r *Row) {
 	}
 }
 
+// ToString returns a pretty formatted string representation of the table
 func (t *Table) ToString() string {
-	jsonBytes, err := json.MarshalIndent(*t, "", "  ")
-	if err != nil {
-		return "<INVALID TABLE>"
+	s := util.JsonDump(*t)
+	if len(s) == 0 {
+		return "<INVALID DAGGRE TABLE>"
 	}
-	return string(jsonBytes)
+	return s
 }
 
+// Equals returns true if the table is equal to the other
 func (t *Table) Equals(other *Table) bool {
 	if len(*t) != len(*other) {
 		return false
@@ -84,4 +88,13 @@ func (d *Data) GetMergedTables(names ...string) *Table {
 		}
 	}
 	return &tbAll
+}
+
+// ToString returns a pretty formatted string representation of the table
+func (d *Data) ToString() string {
+	s := util.JsonDump(*d)
+	if len(s) == 0 {
+		return "<INVALID DAGGRE DATA>"
+	}
+	return s
 }

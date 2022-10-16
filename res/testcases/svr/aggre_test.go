@@ -80,3 +80,137 @@ func TestFilter(t *testing.T) {
 	}
 	t.Logf("test filter successfully\n")
 }
+
+func TestLookup(t *testing.T) {
+	data := &daggre.Data{
+		"customer": &daggre.Table{
+			{
+				"id":      10000,
+				"name":    "hikari",
+				"hobbies": []string{"basketball", "football"},
+				"from":    101,
+			},
+			{
+				"id":      10001,
+				"name":    "kobe",
+				"hobbies": []string{"basketball", "rap"},
+				"from":    202.0,
+			},
+			{
+				"id":      10002,
+				"name":    "ronaldo",
+				"hobbies": []string{"football"},
+				"from":    404,
+			},
+			{
+				"id":      10003,
+				"name":    "james",
+				"hobbies": []string{"basketball"},
+				"from":    303,
+			},
+		},
+		"country": &daggre.Table{
+			{
+				"id":   101,
+				"name": "china",
+			},
+			{
+				"id":   202,
+				"name": "usa",
+			},
+			{
+				"id":   303.0,
+				"name": "russia",
+			},
+		},
+	}
+	aggre := &daggre.Aggregator{
+		Pipelines: []*daggre.Pipeline{
+			{
+				Name:   "country",
+				Desc:   "join customers of country",
+				Tables: []string{"country"},
+				Stages: []*daggre.PipelineStage{
+					{
+						Name: "lookup",
+						Params: map[string]interface{}{
+							"fromPipeline":   "customer",
+							"localLocator":   "id",
+							"foreignLocator": "from",
+							"toField":        "customers",
+						},
+					},
+				},
+			},
+			{
+				Name:   "customer",
+				Desc:   "customer original table",
+				Tables: []string{"customer"},
+			},
+		},
+		Main: "country",
+	}
+	expectedOutput := &daggre.Table{
+		{
+			"customers": []map[string]interface{}{
+				{
+					"from": 101,
+					"hobbies": []string{
+						"basketball",
+						"football",
+					},
+					"id":   10000,
+					"name": "hikari",
+				},
+			},
+			"id":   101,
+			"name": "china",
+		},
+		{
+			"customers": []map[string]interface{}{
+				{
+					"from": 202,
+					"hobbies": []string{
+						"basketball",
+						"rap",
+					},
+					"id":   10001,
+					"name": "kobe",
+				},
+			},
+			"id":   202,
+			"name": "usa",
+		},
+		{
+			"customers": []map[string]interface{}{
+				{
+					"from": 303,
+					"hobbies": []string{
+						"basketball",
+					},
+					"id":   10003,
+					"name": "james",
+				},
+			},
+			"id":   303,
+			"name": "russia",
+		},
+	}
+	requestParams := &model.AggreParams{
+		Data:  data,
+		Aggre: aggre,
+	}
+	output, err := client.RequestAggre(requestParams)
+	if err != nil {
+		t.Logf("request err -> %v\n", err)
+		t.Fail()
+		return
+	}
+	t.Logf("lookup output: %s\n", output.ToString())
+	if !output.Equals(expectedOutput) {
+		t.Logf("output differs from expected output: %s\n", expectedOutput.ToString())
+		t.Fail()
+		return
+	}
+	t.Logf("test lookup successfully\n")
+}
