@@ -8,14 +8,11 @@
       ],
       "stages": [
         {
-          "name": "sort",
+          "name": "unwind",
           "params": {
-            "rules": [
-              {
-                "locator": "id",
-                "order": -1
-              }
-            ]
+            "locator": "hobbies",
+            "includeArrayIndex": "hobbyIdx",
+            "preserveNullAndEmptyArrays": true
           }
         }
       ]

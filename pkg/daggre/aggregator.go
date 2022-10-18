@@ -66,6 +66,7 @@ var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInt
 	"filter": NewFilterStage,
 	"lookup": NewLookupStage,
 	"sort":   NewSortStage,
+	"unwind": NewUnwindStage,
 }
 
 func (p *Pipeline) Process(a *Aggregator) (*Table, error) {

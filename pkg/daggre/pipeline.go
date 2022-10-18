@@ -4,6 +4,7 @@ type PipelineStageParams map[string]interface{}
 
 type PipelineStage struct {
 	Name   string              `json:"name"`
+	Desc   string              `json:"desc"`
 	Params PipelineStageParams `json:"params"`
 }
 
