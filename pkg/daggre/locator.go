@@ -65,41 +65,10 @@ func (l *Locator) Locate(r *Row) interface{} {
 }
 
 func (l *Locator) Set(r *Row, v interface{}) bool {
-	if r == nil || !l.Valid() {
+	parent, field, _ := l.LocateWithParent(r)
+	if parent == nil {
 		return false
 	}
-
-	var ptr interface{} = r
-
-	for i, field := range l.fields {
-		if ptr == nil {
-			return false
-		}
-		if ptr != r {
-			if !isMapType(ptr) {
-				return false
-			}
-		}
-		if i < len(l.fields)-1 {
-			var nxt interface{}
-			var ok bool
-			if ptr == r {
-				nxt, ok = (*r)[field]
-			} else {
-				nxt, ok = ptr.(map[string]interface{})[field]
-			}
-			if !ok {
-				return false
-			} else {
-				ptr = nxt
-			}
-		} else {
-			if ptr == r {
-				(*r)[field] = v
-			} else {
-				ptr.(map[string]interface{})[field] = v
-			}
-		}
-	}
+	parent[field] = v
 	return true
 }

@@ -21,8 +21,14 @@ type SortStage struct {
 	Rules []*SortRule `json:"rules"`
 }
 
-func (s *SortStage) Process(tb *Table, a *Aggregator) *Table {
+func (s *SortStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
 	log.Printf("sort stage: %s\n", util.JsonDump(s))
+
+	ret := &PipelineStageProcessResult{
+		Table:  &Table{},
+		Err:    nil,
+		Detail: nil,
+	}
 
 	// initialize all locators
 	var locators []*Locator
@@ -68,7 +74,8 @@ func (s *SortStage) Process(tb *Table, a *Aggregator) *Table {
 		return false
 	})
 
-	return tb
+	ret.Table = tb
+	return ret
 }
 
 func NewSortStage(params PipelineStageParams) PipelineStageInterface {

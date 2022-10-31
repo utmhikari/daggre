@@ -2,6 +2,8 @@ package daggre
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
@@ -12,12 +14,18 @@ type FilterStage struct {
 	Value    interface{} `json:"value"`
 }
 
-func (f *FilterStage) Process(tb *Table, a *Aggregator) *Table {
+func (f *FilterStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
 	log.Printf("filter stage: %s\n", util.JsonDump(f))
+	ret := &PipelineStageProcessResult{
+		Table:  &Table{},
+		Err:    nil,
+		Detail: nil,
+	}
 
 	locator := NewLocator(f.Locator)
 	if !locator.Valid() {
-		return &Table{} // empty table
+		ret.Err = errors.New(fmt.Sprintf("invalid locator expr: %s", f.Locator))
+		return ret
 	}
 
 	nextTb := Table{}
@@ -29,9 +37,9 @@ func (f *FilterStage) Process(tb *Table, a *Aggregator) *Table {
 			nextTb.AppendRow(row)
 			continue
 		}
-
 	}
-	return &nextTb
+	ret.Table = &nextTb
+	return ret
 }
 
 func NewFilterStage(params PipelineStageParams) PipelineStageInterface {

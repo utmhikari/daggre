@@ -1,6 +1,8 @@
 package daggre
 
 import (
+	"errors"
+	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
@@ -12,18 +14,24 @@ type LookupStage struct {
 	ToField        string `json:"toField"`
 }
 
-func (l *LookupStage) Process(tb *Table, a *Aggregator) *Table {
+func (l *LookupStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
 	log.Printf("lookup stage: %s\n", util.JsonDump(l))
 
-	// TODO: validation
+	ret := &PipelineStageProcessResult{
+		Table:  &Table{},
+		Err:    nil,
+		Detail: nil,
+	}
+
 	if len(l.ToField) == 0 {
-		return &Table{}
+		ret.Err = errors.New("param 'ToField' is required")
+		return ret
 	}
 
 	fromTb, err := a.GetPipelineData(l.FromPipeline)
 	if err != nil {
-		log.Printf("err at pipeline %s -> %s\n", l.FromPipeline, err.Error())
-		return &Table{}
+		ret.Err = errors.New(fmt.Sprintf("err at pipeline %s -> %s", l.FromPipeline, err.Error()))
+		return ret
 	}
 
 	foreignLocator := NewLocator(l.ForeignLocator)
@@ -53,7 +61,8 @@ func (l *LookupStage) Process(tb *Table, a *Aggregator) *Table {
 		}
 	}
 
-	return tb
+	ret.Table = tb
+	return ret
 }
 
 func NewLookupStage(params PipelineStageParams) PipelineStageInterface {

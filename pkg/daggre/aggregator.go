@@ -3,10 +3,7 @@ package daggre
 import (
 	"errors"
 	"fmt"
-	"log"
 )
-
-// ============================== Aggregator start ==============================
 
 type Aggregator struct {
 	Pipelines []*Pipeline `json:"pipelines" binding:"required"`
@@ -38,7 +35,8 @@ func (a *Aggregator) GetPipelineData(name string) (*Table, error) {
 		return nil, errors.New(fmt.Sprintf("no pipeline named %s", name))
 	}
 
-	return pipeline.Process(a)
+	ret := pipeline.Process(a)
+	return ret.OutputTable, nil
 }
 
 func (a *Aggregator) Data() *Data {
@@ -54,37 +52,4 @@ func (a *Aggregator) Aggregate(data *Data) (*Table, error) {
 	a.Reset()
 	a.data = data
 	return a.GetPipelineData(a.Main)
-}
-
-// ============================== Aggregator end ==============================
-
-type PipelineStageInterface interface {
-	Process(*Table, *Aggregator) *Table
-}
-
-var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInterface{
-	"filter": NewFilterStage,
-	"lookup": NewLookupStage,
-	"sort":   NewSortStage,
-	"unwind": NewUnwindStage,
-}
-
-func (p *Pipeline) Process(a *Aggregator) (*Table, error) {
-	tb := a.Data().GetMergedTables(p.Tables...)
-
-	for _, stage := range p.Stages {
-		stageInterfaceFactory, ok := PipelineStageFactory[stage.Name]
-		if !ok {
-			// TODO: graceful implementations
-			log.Panicf("unsupported stage %s\n", stage.Name)
-		}
-		stageInterface := stageInterfaceFactory(stage.Params)
-		tb = stageInterface.Process(tb, a)
-		if len(*tb) == 0 {
-			log.Printf("empty data after stage %+v\n", stage)
-			break
-		}
-	}
-
-	return tb, nil
 }

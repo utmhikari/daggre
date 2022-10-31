@@ -2,6 +2,8 @@ package daggre
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
@@ -14,14 +16,20 @@ type UnwindStage struct {
 
 type Array []interface{}
 
-func (u *UnwindStage) Process(tb *Table, a *Aggregator) *Table {
+func (u *UnwindStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
 	log.Printf("unwind stage: %s\n", util.JsonDump(u))
 
+	ret := &PipelineStageProcessResult{
+		Table:  &Table{},
+		Err:    nil,
+		Detail: nil,
+	}
 	nextTb := Table{}
 
 	locator := NewLocator(u.Locator)
 	if !locator.Valid() {
-		return &nextTb
+		ret.Err = errors.New(fmt.Sprintf("invalid locator expr: %s", u.Locator))
+		return ret
 	}
 
 	for _, row := range *tb {
@@ -53,7 +61,8 @@ func (u *UnwindStage) Process(tb *Table, a *Aggregator) *Table {
 		}
 	}
 
-	return &nextTb
+	ret.Table = &nextTb
+	return ret
 }
 
 func NewUnwindStage(params PipelineStageParams) PipelineStageInterface {
