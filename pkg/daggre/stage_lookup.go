@@ -14,28 +14,28 @@ type LookupStage struct {
 	ToField        string `json:"toField"`
 }
 
-func (l *LookupStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
+func (l *LookupStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult {
 	log.Printf("lookup stage: %s\n", util.JsonDump(l))
 
-	ret := &PipelineStageProcessResult{
-		Table:  &Table{},
-		Err:    nil,
-		Detail: nil,
+	ret := &PipelineStageProcResult{
+		tb:  &Table{},
+		err: nil,
 	}
 
 	if len(l.ToField) == 0 {
-		ret.Err = errors.New("param 'ToField' is required")
+		ret.err = errors.New("param 'ToField' is required")
 		return ret
 	}
 
-	fromTb, err := a.GetPipelineData(l.FromPipeline)
-	if err != nil {
-		ret.Err = errors.New(fmt.Sprintf("err at pipeline %s -> %s", l.FromPipeline, err.Error()))
+	fromPipelineResult := a.PipelineResult(l.FromPipeline)
+	if fromPipelineResult.err != nil {
+		ret.err = errors.New(fmt.Sprintf("fromPipeline error => %s", fromPipelineResult.Error()))
 		return ret
 	}
 
 	foreignLocator := NewLocator(l.ForeignLocator)
 	fromTbRowMap := make(map[interface{}][]*Row)
+	fromTb := fromPipelineResult.Output()
 	for _, row := range *fromTb {
 		locatedValue := foreignLocator.Locate(row)
 		if locatedValue != nil {
@@ -61,7 +61,7 @@ func (l *LookupStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessRes
 		}
 	}
 
-	ret.Table = tb
+	ret.tb = tb
 	return ret
 }
 

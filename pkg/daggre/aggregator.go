@@ -12,10 +12,10 @@ type Aggregator struct {
 	// data source dataset
 	data *Data
 	// cache result cache for pipelines
-	cache map[string]*Table
+	cache map[string]*PipelineResult
 }
 
-func (a *Aggregator) GetPipeline(name string) *Pipeline {
+func (a *Aggregator) Pipeline(name string) *Pipeline {
 	for _, p := range a.Pipelines {
 		if p.Name == name {
 			return p
@@ -24,19 +24,20 @@ func (a *Aggregator) GetPipeline(name string) *Pipeline {
 	return nil
 }
 
-func (a *Aggregator) GetPipelineData(name string) (*Table, error) {
+func (a *Aggregator) PipelineResult(name string) *PipelineResult {
 	cached, ok := a.cache[name]
 	if ok {
-		return cached, nil
+		return cached
 	}
 
-	pipeline := a.GetPipeline(name)
+	pipeline := a.Pipeline(name)
 	if pipeline == nil {
-		return nil, errors.New(fmt.Sprintf("no pipeline named %s", name))
+		ret := NewPipelineResult(nil)
+		ret.err = errors.New(fmt.Sprintf("no pipeline named %s", name))
+		return ret
 	}
 
-	ret := pipeline.Process(a)
-	return ret.OutputTable, nil
+	return pipeline.Process(a)
 }
 
 func (a *Aggregator) Data() *Data {
@@ -45,11 +46,20 @@ func (a *Aggregator) Data() *Data {
 
 func (a *Aggregator) Reset() {
 	a.data = nil
-	a.cache = make(map[string]*Table)
+	a.cache = make(map[string]*PipelineResult)
 }
 
-func (a *Aggregator) Aggregate(data *Data) (*Table, error) {
+type AggregateResult struct {
+	Output *Table        `json:"output"`
+	Stat   *PipelineStat `json:"stat"`
+}
+
+func (a *Aggregator) Aggregate(data *Data) *AggregateResult {
 	a.Reset()
 	a.data = data
-	return a.GetPipelineData(a.Main)
+	ret := a.PipelineResult(a.Main)
+	return &AggregateResult{
+		Output: ret.Output(),
+		Stat:   ret.Stat(),
+	}
 }

@@ -7,14 +7,6 @@ import (
 	"time"
 )
 
-type PipelineStageParams map[string]interface{}
-
-type PipelineStage struct {
-	Name   string              `json:"name"`
-	Desc   string              `json:"desc"`
-	Params PipelineStageParams `json:"params"`
-}
-
 type Pipeline struct {
 	Name   string           `json:"name"`
 	Desc   string           `json:"desc"`
@@ -22,162 +14,140 @@ type Pipeline struct {
 	Stages []*PipelineStage `json:"stages"`
 }
 
-type PipelineStageProcessResult struct {
-	Table  *Table
-	Err    error
-	Detail map[string]interface{}
+type PipelineResult struct {
+	output    *Table
+	err       error
+	inputSize int
+	results   []*PipelineStageResult
+	startTime time.Time
+	endTime   time.Time
 }
 
-const (
-	PipelineStageStatusSkip    = 0
-	PipelineStageStatusSuccess = 1
-	PipelineStageStatusFail    = -1
-)
-
-type PipelineStageResult struct {
-	Status     int                    `json:"status"`
-	Message    string                 `json:"message"`
-	Detail     map[string]interface{} `json:"detail"`
-	StartTime  int64                  `json:"startTime"`
-	EndTime    int64                  `json:"endTime"`
-	PrevLength int                    `json:"prevLength"`
-	CurLength  int                    `json:"curLength"`
-
-	prevTb *Table
-	curTb  *Table
+func (r *PipelineResult) Success() bool {
+	return r.err == nil
 }
 
-func (r *PipelineStageResult) Success() bool {
-	return r.Status == PipelineStageStatusSuccess
-}
-
-func (r *PipelineStageResult) Fail() bool {
-	return r.Status == PipelineStageStatusFail
-}
-
-func NewPipelineStageResult(prevTb *Table, startTime int64, procResult *PipelineStageProcessResult) *PipelineStageResult {
-	ret := &PipelineStageResult{
-		Status:     PipelineStageStatusSkip,
-		Message:    "",
-		Detail:     nil,
-		PrevLength: 0,
-		CurLength:  0,
-		StartTime:  startTime,
-		EndTime:    time.Now().UnixMilli(),
-
-		prevTb: prevTb,
-		curTb:  nil,
+func (r *PipelineResult) Error() string {
+	if r.err == nil {
+		return ""
 	}
-
-	// fix time duration
-	if ret.StartTime > ret.EndTime || ret.StartTime <= 0 {
-		ret.StartTime = ret.EndTime
-	}
-
-	// no prev table given, meaning that the stage process has never been launched
-	if ret.prevTb == nil {
-		return ret
-	}
-	ret.PrevLength = len(*ret.prevTb)
-
-	// no process result given, meaning that the stage process has been skipped
-	if procResult == nil {
-		ret.Message = "process is skipped"
-		return ret
-	}
-
-	// check process result
-	ret.curTb = procResult.Table
-	ret.Detail = procResult.Detail
-	if ret.curTb == nil || len(*ret.curTb) == 0 {
-		ret.Status = PipelineStageStatusFail
-		if procResult.Err == nil {
-			ret.Message = "processed table is empty"
-		} else {
-			ret.Message = procResult.Err.Error()
-		}
-	} else {
-		ret.CurLength = len(*ret.curTb)
-		if procResult.Err == nil {
-			ret.Status = PipelineStageStatusSuccess
-		} else {
-			ret.Status = PipelineStageStatusFail
-			ret.Message = procResult.Err.Error()
-		}
-	}
-	return ret
+	return r.err.Error()
 }
 
-type PipelineStageInterface interface {
-	Process(*Table, *Aggregator) *PipelineStageProcessResult
+func (r *PipelineResult) Output() *Table {
+	return r.output
 }
 
-var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInterface{
-	"filter": NewFilterStage,
-	"lookup": NewLookupStage,
-	"sort":   NewSortStage,
-	"unwind": NewUnwindStage,
+func (r *PipelineResult) AppendStageResult(result *PipelineStageResult) {
+	r.results = append(r.results, result)
 }
 
-type PipelineProcessResult struct {
-	OutputTable  *Table                 `json:"outputTable"`
-	StageResults []*PipelineStageResult `json:"stageResults"`
-	Success      bool                   `json:"success"`
-	Message      string                 `json:"message"`
+type PipelineStat struct {
+	Success    bool                 `json:"success"`
+	Error      string               `json:"error"`
+	InputSize  int                  `json:"inputSize"`
+	OutputSize int                  `json:"outputSize"`
+	StartTime  int64                `json:"startTime"`
+	EndTime    int64                `json:"endTime"`
+	StageStats []*PipelineStageStat `json:"stageStats"`
 }
 
-func (p *Pipeline) Process(a *Aggregator) *PipelineProcessResult {
+func (r *PipelineResult) Stat() *PipelineStat {
+	var errStr string
+	if r.err != nil {
+		errStr = r.err.Error()
+	}
+	var outputSize int
+	if r.output != nil {
+		outputSize = len(*(r.output))
+	}
+	stageStats := make([]*PipelineStageStat, len(r.results))
+	for i, _ := range r.results {
+		stageStats[i] = r.results[i].Stat()
+	}
+	return &PipelineStat{
+		Success:    r.Success(),
+		Error:      errStr,
+		InputSize:  r.inputSize,
+		OutputSize: outputSize,
+		StartTime:  r.startTime.UnixMilli(),
+		EndTime:    r.endTime.UnixMilli(),
+		StageStats: stageStats,
+	}
+}
+
+func NewPipelineResult(input *Table) *PipelineResult {
+	var inputSize int
+	if input != nil {
+		inputSize = len(*input)
+	}
+	return &PipelineResult{
+		output:    &Table{},
+		err:       nil,
+		inputSize: inputSize,
+		results:   []*PipelineStageResult{},
+		startTime: time.Now(),
+		endTime:   time.Now(),
+	}
+}
+
+func logStage(stageNum int, stageName string, msg string) {
+	log.Printf("[Stage %d][%s]: %s", stageNum, stageName, msg)
+}
+
+func makeStageErr(pipelineName string, stageNum int, stageName string, errMsg string) error {
+	return errors.New(fmt.Sprintf("[%s][Stage %d][%s]: %s", pipelineName, stageNum, stageName, errMsg))
+}
+
+func (p *Pipeline) Process(a *Aggregator) *PipelineResult {
 	tb := a.Data().GetMergedTables(p.Tables...)
-	ret := &PipelineProcessResult{
-		OutputTable:  &Table{},
-		StageResults: []*PipelineStageResult{},
-		Success:      true,
-		Message:      "",
-	}
-
+	ret := NewPipelineResult(tb)
 	for i, stage := range p.Stages {
 		stageNum := i + 1
+		stageName := stage.Name
+		stageRet := NewPipelineStageResult()
 
-		if !ret.Success {
-			log.Printf("Stage %d (%s) -> skipped due to failure", stageNum, stage.Name)
-			ret.StageResults = append(ret.StageResults, NewPipelineStageResult(tb, 0, nil))
+		if !ret.Success() {
+			logStage(stageNum, stageName, "skipped due to failure")
+			stageRet.SetProcResult(nil)
+			ret.AppendStageResult(stageRet)
 			tb = &Table{}
 			continue
 		}
 
-		stageInterfaceFactory, ok := PipelineStageFactory[stage.Name]
+		var stageProcRet *PipelineStageProcResult
+		stageInterfaceFactory, ok := PipelineStageFactory[stageName]
 		if !ok {
-			errMsg := fmt.Sprintf("unsupported stage %s", stage.Name)
-			stageProcRet := &PipelineStageProcessResult{
-				Table:  &Table{},
-				Err:    errors.New(errMsg),
-				Detail: nil,
+			errMsg := fmt.Sprintf("unsupported stage %s", stageName)
+			stageProcRet = &PipelineStageProcResult{
+				tb:  &Table{},
+				err: errors.New(errMsg),
 			}
-			ret.StageResults = append(ret.StageResults, NewPipelineStageResult(tb, 0, stageProcRet))
-			log.Printf("Stage %d (%s) -> %s", stageNum, stage.Name, errMsg)
-			ret.Success = false
-			ret.Message = fmt.Sprintf("#%d -> %s", stageNum, errMsg)
+			stageRet.SetProcResult(stageProcRet)
+			ret.AppendStageResult(stageRet)
+			logStage(stageNum, stageName, fmt.Sprintf("error occured, %s", errMsg))
+			ret.err = makeStageErr(p.Name, stageNum, stageName, errMsg)
+			tb = stageProcRet.tb
 			continue
 		}
 
-		log.Printf("Stage %d (%s) -> start processing...", stageNum, stage.Name)
-		startTime := time.Now().UnixMilli()
+		logStage(stageNum, stageName, "start processing...")
 		stageInterface := stageInterfaceFactory(stage.Params)
-		procResult := stageInterface.Process(tb, a)
-		stageRet := NewPipelineStageResult(tb, startTime, procResult)
+		stageProcRet = stageInterface.Process(tb, a)
+		stageRet.SetProcResult(stageProcRet)
 		if stageRet.Success() {
-
+			logStage(stageNum, stageName, "process successfully")
 		} else if stageRet.Fail() {
-			ret.Success = false
-
+			logStage(stageNum, stageName, "process failed: "+stageRet.err.Error())
+			ret.err = makeStageErr(p.Name, stageNum, stageName, stageRet.err.Error())
 		} else {
-			ret.Success = false
-			ret.Message = fmt.Sprintf("#%d -> unexpectedly skipped...", stageNum)
+			logStage(stageNum, stageName, "process unexpectedly skipped!!!")
+			ret.err = makeStageErr(p.Name, stageNum, stageName, "unexpectedly skipped")
 		}
-		ret.StageResults = append(ret.StageResults, stageRet)
-		tb = procResult.Table
+		ret.AppendStageResult(stageRet)
+		tb = stageProcRet.tb
 	}
-
-	ret.OutputTable = tb
+	ret.output = tb
+	ret.endTime = time.Now()
 	return ret
 }

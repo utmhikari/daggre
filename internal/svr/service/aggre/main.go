@@ -5,7 +5,7 @@ import (
 	"github.com/utmhikari/daggre/pkg/daggre"
 )
 
-func DoAggregate(params *model.AggreParams) (*daggre.Table, error) {
+func DoAggregate(params *model.AggreParams) *daggre.AggregateResult {
 	data := params.Data
 	aggre := params.Aggre
 	return aggre.Aggregate(data)

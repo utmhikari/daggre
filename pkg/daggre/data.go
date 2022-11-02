@@ -13,6 +13,7 @@ func (r *Row) Copy() *Row {
 	cp := &Row{}
 	err := util.DeepCopyByJson(r, cp)
 	if err != nil {
+		// TODO: handle error
 		log.Panicf("failed to copy row, %s\n", err.Error())
 		return nil
 	}

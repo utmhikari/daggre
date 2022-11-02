@@ -16,19 +16,18 @@ type UnwindStage struct {
 
 type Array []interface{}
 
-func (u *UnwindStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
+func (u *UnwindStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult {
 	log.Printf("unwind stage: %s\n", util.JsonDump(u))
 
-	ret := &PipelineStageProcessResult{
-		Table:  &Table{},
-		Err:    nil,
-		Detail: nil,
+	ret := &PipelineStageProcResult{
+		tb:  &Table{},
+		err: nil,
 	}
 	nextTb := Table{}
 
 	locator := NewLocator(u.Locator)
 	if !locator.Valid() {
-		ret.Err = errors.New(fmt.Sprintf("invalid locator expr: %s", u.Locator))
+		ret.err = errors.New(fmt.Sprintf("invalid locator expr: %s", u.Locator))
 		return ret
 	}
 
@@ -61,7 +60,7 @@ func (u *UnwindStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessRes
 		}
 	}
 
-	ret.Table = &nextTb
+	ret.tb = &nextTb
 	return ret
 }
 

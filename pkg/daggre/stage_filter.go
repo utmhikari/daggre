@@ -14,17 +14,16 @@ type FilterStage struct {
 	Value    interface{} `json:"value"`
 }
 
-func (f *FilterStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessResult {
+func (f *FilterStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult {
 	log.Printf("filter stage: %s\n", util.JsonDump(f))
-	ret := &PipelineStageProcessResult{
-		Table:  &Table{},
-		Err:    nil,
-		Detail: nil,
+	ret := &PipelineStageProcResult{
+		tb:  &Table{},
+		err: nil,
 	}
 
 	locator := NewLocator(f.Locator)
 	if !locator.Valid() {
-		ret.Err = errors.New(fmt.Sprintf("invalid locator expr: %s", f.Locator))
+		ret.err = errors.New(fmt.Sprintf("invalid locator expr: %s", f.Locator))
 		return ret
 	}
 
@@ -38,7 +37,7 @@ func (f *FilterStage) Process(tb *Table, a *Aggregator) *PipelineStageProcessRes
 			continue
 		}
 	}
-	ret.Table = &nextTb
+	ret.tb = &nextTb
 	return ret
 }
 

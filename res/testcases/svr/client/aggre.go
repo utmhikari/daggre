@@ -13,7 +13,7 @@ import (
 
 var aggreUrl = MakeUrl("/api/v1/aggre")
 
-func RequestAggre(params *model.AggreParams) (*daggre.Table, error) {
+func RequestAggre(params *model.AggreParams) (*daggre.AggregateResult, error) {
 	reqBody, err := json.Marshal(params)
 	if err != nil {
 		return nil, errors.New("reqbody err: " + err.Error())
@@ -49,10 +49,10 @@ func RequestAggre(params *model.AggreParams) (*daggre.Table, error) {
 	if err != nil {
 		return nil, errors.New("cannot marshal resp data to json bytes: " + err.Error())
 	}
-	tb := &daggre.Table{}
-	err = json.Unmarshal(respDataBytes, tb)
+	ret := &daggre.AggregateResult{}
+	err = json.Unmarshal(respDataBytes, ret)
 	if err != nil {
-		return nil, errors.New("cannot convert resp data to daggre table: " + err.Error())
+		return nil, errors.New("cannot convert resp data to aggre result: " + err.Error())
 	}
-	return tb, nil
+	return ret, nil
 }
