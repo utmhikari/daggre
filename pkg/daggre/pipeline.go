@@ -1,9 +1,6 @@
 package daggre
 
 import (
-	"errors"
-	"fmt"
-	"log"
 	"time"
 )
 
@@ -15,6 +12,8 @@ type Pipeline struct {
 }
 
 type PipelineResult struct {
+	// TODO: memory leak? currently assuming that one pipeline would be used by multiple parents
+	// TODO: use child pipeline reference count to check if output table is useless?
 	output    *Table
 	err       error
 	inputSize int
@@ -76,78 +75,13 @@ func (r *PipelineResult) Stat() *PipelineStat {
 	}
 }
 
-func NewPipelineResult(input *Table) *PipelineResult {
-	var inputSize int
-	if input != nil {
-		inputSize = len(*input)
-	}
+func NewPipelineResult() *PipelineResult {
 	return &PipelineResult{
 		output:    &Table{},
 		err:       nil,
-		inputSize: inputSize,
+		inputSize: 0,
 		results:   []*PipelineStageResult{},
 		startTime: time.Now(),
 		endTime:   time.Now(),
 	}
-}
-
-func logStage(stageNum int, stageName string, msg string) {
-	log.Printf("[Stage %d][%s]: %s", stageNum, stageName, msg)
-}
-
-func makeStageErr(pipelineName string, stageNum int, stageName string, errMsg string) error {
-	return errors.New(fmt.Sprintf("[%s][Stage %d][%s]: %s", pipelineName, stageNum, stageName, errMsg))
-}
-
-func (p *Pipeline) Process(a *Aggregator) *PipelineResult {
-	tb := a.Data().GetMergedTables(p.Tables...)
-	ret := NewPipelineResult(tb)
-	for i, stage := range p.Stages {
-		stageNum := i + 1
-		stageName := stage.Name
-		stageRet := NewPipelineStageResult()
-
-		if !ret.Success() {
-			logStage(stageNum, stageName, "skipped due to failure")
-			stageRet.SetProcResult(nil)
-			ret.AppendStageResult(stageRet)
-			tb = &Table{}
-			continue
-		}
-
-		var stageProcRet *PipelineStageProcResult
-		stageInterfaceFactory, ok := PipelineStageFactory[stageName]
-		if !ok {
-			errMsg := fmt.Sprintf("unsupported stage %s", stageName)
-			stageProcRet = &PipelineStageProcResult{
-				tb:  &Table{},
-				err: errors.New(errMsg),
-			}
-			stageRet.SetProcResult(stageProcRet)
-			ret.AppendStageResult(stageRet)
-			logStage(stageNum, stageName, fmt.Sprintf("error occured, %s", errMsg))
-			ret.err = makeStageErr(p.Name, stageNum, stageName, errMsg)
-			tb = stageProcRet.tb
-			continue
-		}
-
-		logStage(stageNum, stageName, "start processing...")
-		stageInterface := stageInterfaceFactory(stage.Params)
-		stageProcRet = stageInterface.Process(tb, a)
-		stageRet.SetProcResult(stageProcRet)
-		if stageRet.Success() {
-			logStage(stageNum, stageName, "process successfully")
-		} else if stageRet.Fail() {
-			logStage(stageNum, stageName, "process failed: "+stageRet.err.Error())
-			ret.err = makeStageErr(p.Name, stageNum, stageName, stageRet.err.Error())
-		} else {
-			logStage(stageNum, stageName, "process unexpectedly skipped!!!")
-			ret.err = makeStageErr(p.Name, stageNum, stageName, "unexpectedly skipped")
-		}
-		ret.AppendStageResult(stageRet)
-		tb = stageProcRet.tb
-	}
-	ret.output = tb
-	ret.endTime = time.Now()
-	return ret
 }

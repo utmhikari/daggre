@@ -125,12 +125,44 @@ func (r *PipelineStageResult) SetProcResult(procResult *PipelineStageProcResult)
 }
 
 type PipelineStageInterface interface {
+	Check() error
+	ChildPipelines() []string
 	Process(*Table, *Aggregator) *PipelineStageProcResult
 }
 
-var PipelineStageFactory = map[string]func(PipelineStageParams) PipelineStageInterface{
+type BasePipelineStage struct{}
+
+func (bps *BasePipelineStage) Check() error {
+	return nil
+}
+
+func (bps *BasePipelineStage) ChildPipelines() []string {
+	return []string{}
+}
+
+func (bps *BasePipelineStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult {
+	return &PipelineStageProcResult{
+		tb:  tb,
+		err: nil,
+	}
+}
+
+type PipelineStageFactory func(PipelineStageParams) PipelineStageInterface
+
+var PipelineStageFactoryMap = map[string]PipelineStageFactory{
 	"filter": NewFilterStage,
 	"lookup": NewLookupStage,
 	"sort":   NewSortStage,
 	"unwind": NewUnwindStage,
+}
+
+func RegisterPipelineStage(name string, factory PipelineStageFactory) {
+	PipelineStageFactoryMap[name] = factory
+}
+
+func UnregisterPipelineStage(name string) {
+	_, ok := PipelineStageFactoryMap[name]
+	if ok {
+		delete(PipelineStageFactoryMap, name)
+	}
 }

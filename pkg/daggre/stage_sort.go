@@ -2,6 +2,7 @@ package daggre
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 	"sort"
@@ -18,7 +19,29 @@ type SortRule struct {
 }
 
 type SortStage struct {
+	BasePipelineStage
 	Rules []*SortRule `json:"rules"`
+}
+
+func (s *SortStage) Check() error {
+	numRules := len(s.Rules)
+	for i := 0; i < numRules; i++ {
+		rule := s.Rules[i]
+		ruleLocator := NewLocator(rule.Locator)
+		if !ruleLocator.Valid() {
+			return fmt.Errorf("rule %d contains invalid locator %s", i+1, rule.Locator)
+		}
+		order := rule.Order
+		if order != AscOrder && order != DescOrder {
+			return fmt.Errorf(
+				"rule %d contains invalid order %d, expected AscOrder %d or DescOrder %d",
+				i+1,
+				order,
+				AscOrder,
+				DescOrder)
+		}
+	}
+	return nil
 }
 
 func (s *SortStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult {

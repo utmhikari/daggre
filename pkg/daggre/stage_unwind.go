@@ -2,16 +2,24 @@ package daggre
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
 
 type UnwindStage struct {
+	BasePipelineStage
 	Locator                    string `json:"locator"`
 	IncludeArrayIndex          string `json:"includeArrayIndex"`
 	PreserveNullAndEmptyArrays bool   `json:"preserveNullAndEmptyArrays"`
+}
+
+func (u *UnwindStage) Check() error {
+	locator := NewLocator(u.Locator)
+	if !locator.Valid() {
+		return fmt.Errorf("invalid locator %s", u.Locator)
+	}
+	return nil
 }
 
 type Array []interface{}
@@ -26,11 +34,6 @@ func (u *UnwindStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult
 	nextTb := Table{}
 
 	locator := NewLocator(u.Locator)
-	if !locator.Valid() {
-		ret.err = errors.New(fmt.Sprintf("invalid locator expr: %s", u.Locator))
-		return ret
-	}
-
 	for _, row := range *tb {
 		parent, field, value := locator.LocateWithParent(row)
 

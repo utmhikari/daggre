@@ -31,6 +31,10 @@ func Start(args *Args) {
 	log.Printf("aggregator: %s\n", util.JsonDump(aggregator))
 
 	aggreResult := aggregator.Aggregate(data)
+
+	descendantStatStr := util.JsonDump(aggreResult.DescendantStats)
+	log.Printf("descendantStat: %s\n", descendantStatStr)
+
 	statStr := util.JsonDump(aggreResult.Stat)
 	log.Printf("stat: %s\n", statStr)
 

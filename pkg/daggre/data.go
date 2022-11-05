@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// Row is the record of data
 type Row map[string]interface{}
 
 // Copy get copy of current row data
@@ -25,6 +26,7 @@ func (r *Row) Equals(other *Row) bool {
 	return fmt.Sprint(*r) == fmt.Sprint(*other)
 }
 
+// Table is the set of rows
 type Table []*Row
 
 // AppendRow appends a copied row to current table
@@ -61,6 +63,7 @@ func (t *Table) Equals(other *Table) bool {
 	return true
 }
 
+// Data is the collection of tables
 type Data map[string]*Table
 
 // GetTable get a copy of specific table

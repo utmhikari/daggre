@@ -2,16 +2,27 @@ package daggre
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
 
 type FilterStage struct {
+	BasePipelineStage
 	Locator  string      `json:"locator"`
 	Operator string      `json:"operator"`
 	Value    interface{} `json:"value"`
+}
+
+func (f *FilterStage) Check() error {
+	locator := NewLocator(f.Locator)
+	if !locator.Valid() {
+		return fmt.Errorf("invalid locator %s", f.Locator)
+	}
+	if !IsComparator(f.Operator) {
+		return fmt.Errorf("invalid comparator %s", f.Operator)
+	}
+	return nil
 }
 
 func (f *FilterStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult {
@@ -20,24 +31,17 @@ func (f *FilterStage) Process(tb *Table, a *Aggregator) *PipelineStageProcResult
 		tb:  &Table{},
 		err: nil,
 	}
-
 	locator := NewLocator(f.Locator)
-	if !locator.Valid() {
-		ret.err = errors.New(fmt.Sprintf("invalid locator expr: %s", f.Locator))
-		return ret
-	}
 
-	nextTb := Table{}
 	for _, row := range *tb {
 		locatedValue := locator.Locate(row)
 
 		// compare?
 		if Compare(locatedValue, f.Value, f.Operator) {
-			nextTb.AppendRow(row)
+			ret.tb.AppendRow(row)
 			continue
 		}
 	}
-	ret.tb = &nextTb
 	return ret
 }
 
