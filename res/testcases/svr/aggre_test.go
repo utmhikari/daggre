@@ -73,7 +73,7 @@ func TestFilter(t *testing.T) {
 		t.Fail()
 		return
 	}
-	t.Logf("aggre stat: %s\n", util.JsonDump(ret.Stat))
+	t.Logf("aggre stats: %s\n", util.JsonDump(ret.Stats))
 	t.Logf("aggre output: %s\n", ret.Output.ToString())
 	if !ret.Output.Equals(expectedOutput) {
 		t.Logf("output differs from expected output: %s\n", expectedOutput.ToString())
@@ -208,7 +208,7 @@ func TestLookup(t *testing.T) {
 		t.Fail()
 		return
 	}
-	t.Logf("aggre stat: %s\n", util.JsonDump(ret.Stat))
+	t.Logf("aggre stats: %s\n", util.JsonDump(ret.Stats))
 	t.Logf("aggre output: %s\n", ret.Output.ToString())
 	if !ret.Output.Equals(expectedOutput) {
 		t.Logf("output differs from expected output: %s\n", expectedOutput.ToString())

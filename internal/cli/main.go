@@ -32,18 +32,25 @@ func Start(args *Args) {
 
 	aggreResult := aggregator.Aggregate(data)
 
-	descendantStatStr := util.JsonDump(aggreResult.DescendantStats)
-	log.Printf("descendantStat: %s\n", descendantStatStr)
+	statsStr := util.JsonDump(aggreResult.Stats)
+	log.Printf("stats: %s\n", statsStr)
 
-	statStr := util.JsonDump(aggreResult.Stat)
-	log.Printf("stat: %s\n", statStr)
+	statsPath := path.Join(args.WorkDir, args.StatsPath)
+	err = ioutil.WriteFile(statsPath, []byte(statsStr), 0644)
+	if err != nil {
+		log.Printf("failed to dump stats file, %s\n", err.Error())
+	} else {
+		log.Println("dump stats successfully")
+	}
 
 	outputStr := util.JsonDump(aggreResult.Output)
 	log.Printf("output: %s\n", outputStr)
 	outputPath := path.Join(args.WorkDir, args.OutputPath)
 	err = ioutil.WriteFile(outputPath, []byte(outputStr), 0644)
 	if err != nil {
-		log.Panicf("failed to dump result to output file, %s\n", err.Error())
+		log.Printf("failed to dump output file, %s\n", err.Error())
+	} else {
+		log.Println("dump result successfully")
 	}
-	log.Printf("dump result successfully")
+
 }

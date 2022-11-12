@@ -10,7 +10,7 @@
         {
           "name": "filter",
           "params": {
-            "locator": "",
+            "locator": "id",
             "operator": "<=",
             "value": -1
           }

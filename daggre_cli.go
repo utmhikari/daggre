@@ -18,27 +18,33 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:        "workdir",
-			Usage:       "CLI: working directory of source files (optional)",
+			Usage:       "working directory of source files (optional)",
 			Value:       "",
 			Destination: &args.WorkDir,
 		},
 		cli.StringFlag{
 			Name:        "datapath",
-			Usage:       "CLI: data source file path",
+			Usage:       "data source file path",
 			Value:       "data.json",
 			Destination: &args.DataPath,
 		},
 		cli.StringFlag{
 			Name:        "aggrepath",
-			Usage:       "CLI: aggregator file path",
+			Usage:       "aggregator file path",
 			Value:       "aggre.json",
 			Destination: &args.AggrePath,
 		},
 		cli.StringFlag{
 			Name:        "outputpath",
-			Usage:       "CLI: data aggregation output file path",
+			Usage:       "aggregation output file path",
 			Value:       "output.json",
 			Destination: &args.OutputPath,
+		},
+		cli.StringFlag{
+			Name:        "statspath",
+			Usage:       "aggregation stats file path",
+			Value:       "stats.json",
+			Destination: &args.StatsPath,
 		},
 	}
 

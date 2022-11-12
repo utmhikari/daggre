@@ -20,7 +20,7 @@ func (a *aggreHandler) Aggregate(c *gin.Context) {
 			Response()
 		return
 	}
-	aggreResult := aggreService.DoAggregate(&aggreParams)
+	aggreResult := aggreService.Aggregate(&aggreParams)
 	log.Printf("aggre result: %s\n", util.JsonDump(aggreResult))
 	OKResp(c).SetMessage("aggregate finished!").SetData(aggreResult).Response()
 }

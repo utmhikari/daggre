@@ -143,25 +143,10 @@ func (a *Aggregator) RuntimePipelineResult(name string) *PipelineResult {
 	return ret
 }
 
-type AggregateResult struct {
-	pipelineResult  *PipelineResult
-	Output          *Table                   `json:"output"`
-	Stat            *PipelineStat            `json:"stat"`
-	DescendantStats map[string]*PipelineStat `json:"descendantStats"`
-}
-
-func (ar *AggregateResult) UpdatePipelineResult(pipelineResult *PipelineResult) {
-	ar.pipelineResult = pipelineResult
-	if ar.pipelineResult != nil {
-		ar.Output = ar.pipelineResult.Output()
-		ar.Stat = ar.pipelineResult.Stat()
-	}
-}
-
-func (ar *AggregateResult) UpdateDescendantStat(name string, pipelineStat *PipelineStat) {
-	if name != "" && pipelineStat != nil {
-		ar.DescendantStats[name] = pipelineStat
-	}
+type AggreResult struct {
+	pipelineResult *PipelineResult
+	Output         *Table                   `json:"output"`
+	Stats          map[string]*PipelineStat `json:"stats"`
 }
 
 func (a *Aggregator) checkPipeline(name string, visited map[string]bool) error {
@@ -206,13 +191,12 @@ func (a *Aggregator) CheckPipelines() error {
 	return a.checkPipeline(a.Main, visited)
 }
 
-func (a *Aggregator) Aggregate(data *Data) *AggregateResult {
+func (a *Aggregator) Aggregate(data *Data) *AggreResult {
 	a.Reset(data)
-	ret := &AggregateResult{
-		Output:          nil,
-		Stat:            nil,
-		DescendantStats: make(map[string]*PipelineStat),
-		pipelineResult:  nil,
+	ret := &AggreResult{
+		Output:         nil,
+		Stats:          make(map[string]*PipelineStat),
+		pipelineResult: nil,
 	}
 	var pipelineResult *PipelineResult
 
@@ -225,12 +209,15 @@ func (a *Aggregator) Aggregate(data *Data) *AggregateResult {
 		a.running = true
 		pipelineResult = a.process(a.MainPipeline())
 		a.running = false
+		if pipelineResult != nil {
+			ret.Output = pipelineResult.Output()
+		}
 		for name, cachedResult := range a.cache {
-			if name != a.Main {
-				ret.UpdateDescendantStat(name, cachedResult.Stat())
+			stat := cachedResult.Stat()
+			if name != "" && stat != nil {
+				ret.Stats[name] = stat
 			}
 		}
 	}
-	ret.UpdatePipelineResult(pipelineResult)
 	return ret
 }
