@@ -3,7 +3,7 @@ package client
 import "fmt"
 
 var Host = "http://localhost"
-var Port = 8964
+var Port = 8954
 
 func MakeUrl(path string) string {
 	return fmt.Sprintf("%s:%d%s", Host, Port, path)
