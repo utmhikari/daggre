@@ -1,0 +1,19 @@
+{
+  "customer": {
+    "success": true,
+    "error": "",
+    "inputSize": 3,
+    "outputSize": 2,
+    "startTime": 1668248889719,
+    "endTime": 1668248889719,
+    "stageStats": [
+      {
+        "status": "success",
+        "error": "",
+        "startTime": 1668248889719,
+        "endTime": 1668248889719,
+        "outputSize": 2
+      }
+    ]
+  }
+}

@@ -5,4 +5,5 @@ type Args struct {
 	DataPath   string
 	AggrePath  string
 	OutputPath string
+	StatsPath  string
 }

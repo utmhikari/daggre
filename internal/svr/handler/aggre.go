@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/utmhikari/daggre/internal/svr/model"
 	aggreService "github.com/utmhikari/daggre/internal/svr/service/aggre"
+	"github.com/utmhikari/daggre/pkg/util"
 	"log"
-	"time"
 )
 
 type aggreHandler struct{}
@@ -20,22 +20,9 @@ func (a *aggreHandler) Aggregate(c *gin.Context) {
 			Response()
 		return
 	}
-
-	startTime := time.Now()
-
-	data, err := aggreService.DoAggregate(&aggreParams)
-	if err != nil {
-		log.Printf("DoAggregate error: %v\n", err)
-		ErrResp(c).
-			SetMessage(fmt.Sprintf("aggregation error: %v\n", err)).
-			Response()
-		return
-	}
-
-	endTime := time.Now()
-	deltaTime := endTime.Sub(startTime)
-	log.Printf("aggregation elapsed %d milliseconds\n", deltaTime.Milliseconds())
-	OKResp(c).SetMessage("aggregate successfully!").SetData(data).Response()
+	aggreResult := aggreService.Aggregate(&aggreParams)
+	log.Printf("aggre result: %s\n", util.JsonDump(aggreResult))
+	OKResp(c).SetMessage("aggregate finished!").SetData(aggreResult).Response()
 }
 
 var Aggre = &aggreHandler{}

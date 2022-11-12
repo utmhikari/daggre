@@ -3,6 +3,7 @@ package svr
 import (
 	"github.com/utmhikari/daggre/internal/svr/model"
 	"github.com/utmhikari/daggre/pkg/daggre"
+	"github.com/utmhikari/daggre/pkg/util"
 	"github.com/utmhikari/daggre/res/testcases/svr/client"
 	"testing"
 )
@@ -66,14 +67,15 @@ func TestFilter(t *testing.T) {
 		Data:  data,
 		Aggre: aggre,
 	}
-	output, err := client.RequestAggre(requestParams)
+	ret, err := client.RequestAggre(requestParams)
 	if err != nil {
 		t.Logf("request err -> %v\n", err)
 		t.Fail()
 		return
 	}
-	t.Logf("aggre output: %s\n", output.ToString())
-	if !output.Equals(expectedOutput) {
+	t.Logf("aggre stats: %s\n", util.JsonDump(ret.Stats))
+	t.Logf("aggre output: %s\n", ret.Output.ToString())
+	if !ret.Output.Equals(expectedOutput) {
 		t.Logf("output differs from expected output: %s\n", expectedOutput.ToString())
 		t.Fail()
 		return
@@ -200,14 +202,15 @@ func TestLookup(t *testing.T) {
 		Data:  data,
 		Aggre: aggre,
 	}
-	output, err := client.RequestAggre(requestParams)
+	ret, err := client.RequestAggre(requestParams)
 	if err != nil {
 		t.Logf("request err -> %v\n", err)
 		t.Fail()
 		return
 	}
-	t.Logf("lookup output: %s\n", output.ToString())
-	if !output.Equals(expectedOutput) {
+	t.Logf("aggre stats: %s\n", util.JsonDump(ret.Stats))
+	t.Logf("aggre output: %s\n", ret.Output.ToString())
+	if !ret.Output.Equals(expectedOutput) {
 		t.Logf("output differs from expected output: %s\n", expectedOutput.ToString())
 		t.Fail()
 		return

@@ -35,75 +35,40 @@ func isMapType(v interface{}) bool {
 	return tp == mapType
 }
 
-func (l *Locator) Locate(r *Row) interface{} {
+// LocateWithParent returns parent, field and value
+func (l *Locator) LocateWithParent(r *Row) (map[string]interface{}, string, interface{}) {
 	if r == nil || !l.Valid() {
-		return nil
+		return nil, "", nil
 	}
 
-	var ptr interface{} = r
-	for _, field := range l.fields {
-		if ptr == nil {
-			break
-		}
-		if ptr != r {
-			if !isMapType(ptr) {
-				ptr = nil
-				break
-			}
+	var ptr map[string]interface{} = *r
+	for i, field := range l.fields {
+		if i == len(l.fields)-1 {
+			value, _ := ptr[field]
+			return ptr, field, value
 		}
 
-		var nxt interface{}
-		var ok bool
-		if ptr == r {
-			nxt, ok = (*r)[field]
-		} else {
-			nxt, ok = ptr.(map[string]interface{})[field]
+		nxt, ok := ptr[field]
+		if !ok || !isMapType(nxt) {
+			return nil, "", nil
 		}
-		if !ok {
-			ptr = nil
-		} else {
-			ptr = nxt
-		}
+		ptr = nxt.(map[string]interface{})
 	}
-	return ptr
+
+	// UNREACHABLE
+	return nil, "", nil
+}
+
+func (l *Locator) Locate(r *Row) interface{} {
+	_, _, value := l.LocateWithParent(r)
+	return value
 }
 
 func (l *Locator) Set(r *Row, v interface{}) bool {
-	if r == nil || !l.Valid() {
+	parent, field, _ := l.LocateWithParent(r)
+	if parent == nil {
 		return false
 	}
-
-	var ptr interface{} = r
-
-	for i, field := range l.fields {
-		if ptr == nil {
-			return false
-		}
-		if ptr != r {
-			if !isMapType(ptr) {
-				return false
-			}
-		}
-		if i < len(l.fields)-1 {
-			var nxt interface{}
-			var ok bool
-			if ptr == r {
-				nxt, ok = (*r)[field]
-			} else {
-				nxt, ok = ptr.(map[string]interface{})[field]
-			}
-			if !ok {
-				return false
-			} else {
-				ptr = nxt
-			}
-		} else {
-			if ptr == r {
-				(*r)[field] = v
-			} else {
-				ptr.(map[string]interface{})[field] = v
-			}
-		}
-	}
+	parent[field] = v
 	return true
 }

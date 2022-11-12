@@ -30,21 +30,27 @@ func Start(args *Args) {
 	log.Printf("data: %s\n", util.JsonDump(data))
 	log.Printf("aggregator: %s\n", util.JsonDump(aggregator))
 
-	tb, err := aggregator.Aggregate(data)
+	aggreResult := aggregator.Aggregate(data)
+
+	statsStr := util.JsonDump(aggreResult.Stats)
+	log.Printf("stats: %s\n", statsStr)
+
+	statsPath := path.Join(args.WorkDir, args.StatsPath)
+	err = ioutil.WriteFile(statsPath, []byte(statsStr), 0644)
 	if err != nil {
-		log.Panicf("failed to process aggregator, %s\n", err.Error())
+		log.Printf("failed to dump stats file, %s\n", err.Error())
+	} else {
+		log.Println("dump stats successfully")
 	}
 
-	jsonStr := util.JsonDump(tb)
-	if len(jsonStr) == 0 {
-		log.Panicf("failed to marshal result as json, %s\n", err.Error())
-	}
-	log.Printf("output: %s\n", jsonStr)
-
+	outputStr := util.JsonDump(aggreResult.Output)
+	log.Printf("output: %s\n", outputStr)
 	outputPath := path.Join(args.WorkDir, args.OutputPath)
-	err = ioutil.WriteFile(outputPath, []byte(jsonStr), 0644)
+	err = ioutil.WriteFile(outputPath, []byte(outputStr), 0644)
 	if err != nil {
-		log.Panicf("failed to dump result to output file, %s\n", err.Error())
+		log.Printf("failed to dump output file, %s\n", err.Error())
+	} else {
+		log.Println("dump result successfully")
 	}
-	log.Printf("dump result successfully")
+
 }

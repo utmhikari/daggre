@@ -1,0 +1,28 @@
+{
+  "country": {
+    "success": true,
+    "error": "",
+    "inputSize": 3,
+    "outputSize": 3,
+    "startTime": 1668248988524,
+    "endTime": 1668248988524,
+    "stageStats": [
+      {
+        "status": "success",
+        "error": "",
+        "startTime": 1668248988524,
+        "endTime": 1668248988524,
+        "outputSize": 3
+      }
+    ]
+  },
+  "customer": {
+    "success": true,
+    "error": "",
+    "inputSize": 4,
+    "outputSize": 4,
+    "startTime": 1668248988524,
+    "endTime": 1668248988524,
+    "stageStats": []
+  }
+}

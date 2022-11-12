@@ -82,6 +82,11 @@ var comparators = map[string]func(a, b interface{}) bool{
 	ComparisonOperatorLe: func(a, b interface{}) bool { return compareOrder(a, b, ComparisonOperatorLe) },
 }
 
+func IsComparator(op string) bool {
+	_, ok := comparators[op]
+	return ok
+}
+
 func Compare(a, b interface{}, operator string) bool {
 	// comparison?
 	comparator, ok := comparators[operator]
