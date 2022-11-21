@@ -144,9 +144,8 @@ func (a *Aggregator) RuntimePipelineResult(name string) *PipelineResult {
 }
 
 type AggreResult struct {
-	pipelineResult *PipelineResult
-	Output         *Table                   `json:"output"`
-	Stats          map[string]*PipelineStat `json:"stats"`
+	Output *Table                   `json:"output"`
+	Stats  map[string]*PipelineStat `json:"stats"`
 }
 
 func (a *Aggregator) checkPipeline(name string, visited map[string]bool) error {
@@ -194,9 +193,8 @@ func (a *Aggregator) CheckPipelines() error {
 func (a *Aggregator) Aggregate(data *Data) *AggreResult {
 	a.Reset(data)
 	ret := &AggreResult{
-		Output:         nil,
-		Stats:          make(map[string]*PipelineStat),
-		pipelineResult: nil,
+		Output: nil,
+		Stats:  make(map[string]*PipelineStat),
 	}
 	var pipelineResult *PipelineResult
 
