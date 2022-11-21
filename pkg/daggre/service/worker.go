@@ -49,7 +49,7 @@ func (w *Worker) onStop() {
 	for _, resultChan := range w.resultCache {
 		close(resultChan)
 	}
-	w.resultCache = make(map[uint]chan *daggre.AggreResult, 1)
+	w.resultCache = make(map[uint]chan *daggre.AggreResult)
 }
 
 func (w *Worker) Start() {
