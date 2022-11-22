@@ -204,3 +204,16 @@ The params are follows:
 - `locator`: the locator to locate the array value
 - `includeArrayIndex`: if not empty, specifies the key to hold the array index value
 - `preserveNullAndEmptyArrays`: whether preserve the row if array value cannot be located
+
+## Customization
+
+You are able to customize your own pipeline stages by doing these steps:
+
+- declare the `struct` your stage, which should contain `daggre.BasePipelineStage` and your stage params as members
+- implement methods of `daggre.PipelineStageInterface` if necessary
+  - `Check`: check if there is error in stage params
+  - `ChildPipelines`: declare all the stage params representing other pipelines
+  - `Process`: pipeline process logic
+- implement factory function `NewXXXStage`, then call `daggre.RegisterPipelineStage` to register it
+
+see `res/testcases/zzz/custom/custom_stage_test.go` for an example

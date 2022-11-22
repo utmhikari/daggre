@@ -1,4 +1,4 @@
-package cli
+package worker
 
 import (
 	"github.com/utmhikari/daggre/pkg/daggre"
@@ -108,7 +108,7 @@ func TestWorkerFilterMultiple(t *testing.T) {
 			t.Logf("run test %d,", taskNum)
 			ret, err := worker.Aggregate(filterData, filterAggre)
 			if err != nil {
-				t.Logf("aggre err -> %v\n", err)
+				t.Logf("aggre fail -> %v\n", err)
 				t.Fail()
 				return
 			}

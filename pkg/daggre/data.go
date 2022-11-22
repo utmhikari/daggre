@@ -1,7 +1,7 @@
 package daggre
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/utmhikari/daggre/pkg/util"
 	"log"
 )
@@ -23,7 +23,15 @@ func (r *Row) Copy() *Row {
 
 // Equals returns true if the row is equal to the other
 func (r *Row) Equals(other *Row) bool {
-	return fmt.Sprint(*r) == fmt.Sprint(*other)
+	b1, e1 := json.Marshal(*r)
+	if e1 != nil {
+		return false
+	}
+	b2, e2 := json.Marshal(*other)
+	if e2 != nil {
+		return false
+	}
+	return string(b1) == string(b2)
 }
 
 // Table is the set of rows
