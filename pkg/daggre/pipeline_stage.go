@@ -97,6 +97,21 @@ type PipelineStageProcResult struct {
 	err error
 }
 
+func (pspr *PipelineStageProcResult) GetTable() *Table {
+	return pspr.tb
+}
+
+func (pspr *PipelineStageProcResult) SetError(err error) {
+	pspr.err = err
+}
+
+func NewPipelineStageProcResult() *PipelineStageProcResult {
+	return &PipelineStageProcResult{
+		tb:  &Table{},
+		err: nil,
+	}
+}
+
 func (r *PipelineStageResult) SetProcResult(procResult *PipelineStageProcResult) {
 	r.endTime = time.Now()
 
